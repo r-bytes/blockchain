@@ -5,21 +5,25 @@ import "./SimpleStorage.sol";
 
 contract StorageFactory {
     // type, visibility, variable name
-    SimpleStorage[] public simpleStorageAray;
+    SimpleStorage[] public simpleStorageArray;
 
     function createSimpleStorageContract() public {
         SimpleStorage simpleStorage = new SimpleStorage();
-        simpleStorageAray.push(simpleStorage);
+        simpleStorageArray.push(simpleStorage);
     }
 
     function sfStore(uint256 _simpleStorageIndex, uint256 _simpleStorageNumber) public {
         // to interact with other contracts we need the
         // contract address
-        // ABI - application binary interface
-        simpleStorageAray[_simpleStorageIndex].store(_simpleStorageNumber);
+        // ABI - Application Binary Interface
+        // SimpleStorage simpleStorage = simpleStorageArray[_simpleStorageIndex];
+        // simpleStorage.store(_simpleStorageNumber)
+        simpleStorageArray[_simpleStorageIndex].store(_simpleStorageNumber); // refactor
     }
 
     function sfGet(uint256 _simpleStorageIndex) public view returns(uint256) {
-        return simpleStorageAray[_simpleStorageIndex].retrieve();
+        // SimpleStorage simpleStorage = simpleStorageArray[_simpleStorageIndex];
+        // return simpleStorage.retrieve()
+        return simpleStorageArray[_simpleStorageIndex].retrieve(); // refactor
     }
 }
