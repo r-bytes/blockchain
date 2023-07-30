@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.2 <0.9.0;
-
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract FundMe {
     uint256 public minimunUsd = 50 * 1e18; // 1 * 10 ** 18
+    address[] public funders;
+    mapping(address => uint256) public AddressToAmountFunded;
+
     // get funds from user
     // withdraw funds
 
@@ -14,10 +16,12 @@ contract FundMe {
         require(getConversionRate(msg.value) >= minimunUsd, "Didn't send enough"); // 1e18 == 1 * 10 ** 18 == 1000000000000000000 wei = 1 ether
         // what is reverting? => undo any action before, and send remaining gas back
         // 18 decimals
+        address.push(msg.sender);
+        AddressToAmountFunded[msg.sender] = msg.value;
     }
 
     function getPrice() public view returns(uint256) {
-        // ABI
+        // ABI 
         // Adddress
         // 0x694AA1769357215DE4FAC081bf1f309aDC325306
         AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
