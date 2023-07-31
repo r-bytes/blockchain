@@ -11,6 +11,12 @@ contract FundMe {
     address[] public funders;
     mapping(address => uint256) public AddressToAmountFunded;
 
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
     // get funds from user
     // withdraw funds
 
@@ -20,11 +26,11 @@ contract FundMe {
         require(msg.value.getConversionRate() >= minimunUsd, "Didn't send enough"); // 1e18 == 1 * 10 ** 18 == 1000000000000000000 wei = 1 ether
         // what is reverting? => undo any action before, and send remaining gas back
         // 18 decimals
-        address.push(msg.sender);
-        AddressToAmountFunded[msg.sender] = msg.value;
+        funders.push(msg.sender);
+        AddressToAmountFunded[msg.sender] += msg.value;
     }
 
-    function withdraw() {
+    function withdraw() public onlyOwner {
         for(uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
             address funder = funders[funderIndex];
             AddressToAmountFunded[funder] = 0;
@@ -47,5 +53,10 @@ contract FundMe {
         // forward all gas or set gas, returns bool
         (bool callSuccess,) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "call failed");
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner, "Sender is not owner");
+        _;       
     }
 }
