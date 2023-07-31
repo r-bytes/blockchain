@@ -31,5 +31,21 @@ contract FundMe {
         }
         // reset the array
         funders = new address[](0);
+
+        // actually withdraw the funds (there are three options)
+
+        // option 1 = transfer 
+        // gas limit is capped to 2300, throws an error
+        // payable(msg.sender).transfer(address(this).balance);
+
+        // option 2. send
+        // gas limit is capped to 2300, return an bool
+        // bool sendSuccess = payable(msg.sender).send(address(this).balance);
+        // require(sendSuccess, "send failed");
+        
+        // option 3 - call (recommended way)
+        // forward all gas or set gas, returns bool
+        (bool callSuccess,) = payable(msg.sender).call{value: address(this).balance}("");
+        require(callSuccess, "call failed");
     }
 }
