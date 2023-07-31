@@ -6,15 +6,15 @@ import "./PriceConverter.sol";
 contract FundMe {
     using PriceConverter for uint256;
 
-    uint256 public minimunUsd = 50 * 1e18; // 1 * 10 ** 18
+    uint256 public constant MINIMUN_USD = 50 * 1e18; // 1 * 10 ** 18
 
     address[] public funders;
     mapping(address => uint256) public AddressToAmountFunded;
 
-    address public owner;
+    address public immutable i_owner;
 
     constructor() {
-        owner = msg.sender;
+        i_owner = msg.sender;
     }
 
     // get funds from user
@@ -23,7 +23,7 @@ contract FundMe {
     function fund() public payable {
         // set a minimum amount of funding value in USD
         // 1. how do we send WTH to this contract
-        require(msg.value.getConversionRate() >= minimunUsd, "Didn't send enough"); // 1e18 == 1 * 10 ** 18 == 1000000000000000000 wei = 1 ether
+        require(msg.value.getConversionRate() >= MINIMUN_USD, "Didn't send enough"); // 1e18 == 1 * 10 ** 18 == 1000000000000000000 wei = 1 ether
         // what is reverting? => undo any action before, and send remaining gas back
         // 18 decimals
         funders.push(msg.sender);
@@ -56,7 +56,7 @@ contract FundMe {
     }
 
     modifier onlyOwner {
-        require(msg.sender == owner, "Sender is not owner");
+        require(msg.sender == i_owner, "Sender is not owner");
         _;       
     }
 }
