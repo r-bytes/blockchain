@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "solc": "0.8.21"
+  },
+  "scripts": {
+    "compile": "yarn solcjs --bin --abi --include-path node_module/ --base-path . -o . SimpleStorage.sol"
+  }
+}
