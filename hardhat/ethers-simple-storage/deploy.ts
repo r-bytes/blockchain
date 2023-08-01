@@ -1,13 +1,13 @@
-import { ethers } from "ethers";
+import { BaseContract, ContractFactory, ContractTransactionReceipt, JsonRpcProvider, Wallet, ethers } from "ethers";
 import * as fs from "fs-extra";
 import "dotenv/config";
 
 async function main() {
   const providerUrl: string = "http://127.0.0.1:8545";
-  const provider: ethers.JsonRpcProvider = new ethers.JsonRpcProvider(
+  const provider: JsonRpcProvider = new JsonRpcProvider(
     providerUrl
   );
-  const wallet: ethers.Wallet = new ethers.Wallet(
+  const wallet: Wallet = new Wallet(
     process.env.PRIVATE_KEY!,
     provider
   );
@@ -20,9 +20,8 @@ async function main() {
     "utf8"
   );
 
-  const contractFactory: ethers.ContractFactory<any[], ethers.BaseContract> =
-    new ethers.ContractFactory(abi, binary, wallet);
-  console.log("=> Deploying, please wait...");
+  const contractFactory = new ContractFactory(abi, binary, wallet);
+  // console.log("=> Deploying, please wait...");
 
   /* deploy options */
   const deploymentOptions = {
@@ -30,20 +29,22 @@ async function main() {
   };
 
   /* deploy the actual contract */
-  const contract = await contractFactory.deploy(
-    deploymentOptions
-  );
+  // TODO: type error
+  const contract: any = await contractFactory.deploy(deploymentOptions);
 
   console.log("=> contract", contract);
+  console.log("=> interface1", typeof(contract.interface));
+  console.log("=> interface2", contract.interface);
 
-  const transactionReceipt: ethers.ContractTransactionReceipt  = await contract.deploymentTransaction().wait(1);
+  const transactionReceipt: ContractTransactionReceipt = await contract
+    .deploymentTransaction()
+    .wait(1);
 
-  
-  console.log("=> This is the deployment transaction (transaction response): ");
-  console.log(contract.deploymentTransaction())
+  // console.log("=> This is the deployment transaction (transaction response): ");
+  // console.log(contract.deploymentTransaction());
 
-  console.log("=> This is the transaction receipt (after first block): ");
-  console.log(transactionReceipt)
+  // console.log("=> This is the transaction receipt (after first block): ");
+  // console.log(transactionReceipt);
 
   // /* DEPLOY WITH ONLY DATA */
   // console.log("=> deploy with only data (unlimited flexibility):")
@@ -65,7 +66,7 @@ async function main() {
   // await sendTxResponse.wait(1)
 
   // console.log(sendTxResponse)
-
+  const currentFavoriteNumber = await contract.retrieve()
 }
 
 main()
