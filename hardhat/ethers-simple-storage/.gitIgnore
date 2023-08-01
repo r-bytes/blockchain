@@ -3,4 +3,3 @@ node_modules
 *bin
 .DS_Store
 yarn.lock
-yarn.lock
