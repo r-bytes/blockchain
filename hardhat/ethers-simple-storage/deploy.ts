@@ -1,22 +1,16 @@
-import {
-  BaseContract,
-  Contract,
-  ContractFactory,
-  ContractFunction,
-  Wallet,
-  ethers,
-  providers,
-} from "ethers";
+// prettier-ignore
+import { Contract, ContractFactory, ContractFunction, Wallet, ethers, } from "ethers";
+import { Block, BlockTag, Filter, FilterByBlockHash, Listener, Log, Provider, TransactionReceipt, TransactionRequest, TransactionResponse } from "@ethersproject/abstract-provider";
 
 import * as fs from "fs-extra";
 import "dotenv/config";
 
 async function main() {
   // url
-  const providerUrl: string = "http://127.0.0.1:8545";
+  const providerUrl: string = process.env.RPC_URL;
   // provider
-  const provider: ethers.providers.JsonRpcProvider =
-    new ethers.providers.JsonRpcProvider(providerUrl);
+  // prettier-ignore
+  const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(providerUrl);
   // wallet
   const wallet: Wallet = new Wallet(process.env.PRIVATE_KEY!, provider);
   const abi: string = fs.readFileSync(
@@ -38,15 +32,15 @@ async function main() {
 
   /* deploy the actual contract */
   const contract: Contract = await contractFactory.deploy(deploymentOptions);
-  console.log("=> contract", contract);
+  console.log("=====> contract", contract);
 
   const transactionReceipt: ethers.providers.TransactionReceipt =
     await contract.deployTransaction.wait(1);
 
-  console.log("=> This is the deployment transaction (transaction response): ");
-  console.log(contract.deploymentTransaction());
+  console.log("=====> This is the deployment transaction (transaction response): ");
+  console.log(contract.deployTransaction);
 
-  console.log("=> This is the transaction receipt (after first block): ");
+  console.log("=====> This is the transaction receipt (after first block): ");
   console.log(transactionReceipt);
 
   // /* DEPLOY WITH ONLY DATA */
@@ -69,8 +63,19 @@ async function main() {
   // await sendTxResponse.wait(1)
 
   // console.log(sendTxResponse)
+
+  /* interact with contract functions */
+  // retrieve initial favorite number
   const currentFavoriteNumber: ContractFunction = await contract.retrieve();
-  console.log("=> currentFavoriteNumber", currentFavoriteNumber);
+  console.log("=====> currentFavoriteNumber is: ", currentFavoriteNumber.toString());
+  
+  // store a new favorite number
+  const txResponse: TransactionResponse = await contract.store("7")
+  const txReceipt: TransactionReceipt = await txResponse.wait(1)
+
+  // retrieve the updated favorite number
+  const updatedFavoriteNumber: ContractFunction = await contract.retrieve();
+  console.log("=====> updatedFavoriteNumber is: ", updatedFavoriteNumber.toString());
 }
 
 main()
