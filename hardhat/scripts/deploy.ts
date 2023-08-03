@@ -1,14 +1,15 @@
 import { ethers, run, network } from "hardhat"
 import { SimpleStorage, SimpleStorage__factory } from "../typechain-types";
+import { ContractTransactionResponse } from "ethers";
 
-async function main() {
+async function main(): Promise<void> {
   const simpleStorageFactory: SimpleStorage__factory = await ethers.getContractFactory("SimpleStorage")
   
   console.log("=====> deploying contract ...")
-  const simpleStorage = await simpleStorageFactory.deploy({gasLimit: 2000000})
+  const simpleStorage: SimpleStorage = await simpleStorageFactory.deploy({gasLimit: 2000000})
   await simpleStorage.waitForDeployment()
 
-  const contractAdress = await simpleStorage.getAddress()
+  const contractAdress: string = await simpleStorage.getAddress()
   console.log("=====> deployed contract address is: ", contractAdress, network.config.chainId === 4 ? "check it out on https://rinkeby.etherscan.io" : network.config.chainId === 11155111 ? "check it out on https://sepolia.etherscan.io" : "")
   
   console.log("=====> network is: ", network.config.chainId === 4 ? "rinkeby" : network.config.chainId === 11155111 ? "sepolia" : "hardhat or ganache")
@@ -25,20 +26,20 @@ async function main() {
   }
 
   /* get current favorite number */
-  const currentValue = await simpleStorage.retrieve()
+  const currentValue: bigint = await simpleStorage.retrieve()
   console.log("=====> current favorite number value is: ", currentValue.toString())
   
   /* update current favorite number */
   console.log("=====> storing a new favorite number value...")
-  const txResponse = await simpleStorage.store("8")
+  const txResponse: ContractTransactionResponse = await simpleStorage.store("8")
   await txResponse.wait(1)
   
   /* get updated favorite number */
-  const updatedValue = await simpleStorage.retrieve()
+  const updatedValue: bigint = await simpleStorage.retrieve()
   console.log("=====> updated favorite number value is: ", updatedValue.toString())
 }
 
-async function verify(contractAddress: string, args: any) {
+async function verify(contractAddress: string, args: []): Promise<void> {
   console.log("=====> verifying contract ...")
 
   try {    
