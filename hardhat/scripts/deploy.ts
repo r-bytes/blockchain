@@ -1,27 +1,61 @@
-import { ethers } from "hardhat";
+import { ethers, run, network } from "hardhat"
+import { SimpleStorage, SimpleStorage__factory } from "../typechain-types";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  const simpleStorageFactory: SimpleStorage__factory = await ethers.getContractFactory("SimpleStorage")
+  
+  console.log("=====> deploying contract ...")
+  const simpleStorage = await simpleStorageFactory.deploy({gasLimit: 2000000})
+  await simpleStorage.waitForDeployment()
 
-  const lockedAmount = ethers.parseEther("0.001");
+  const contractAdress = await simpleStorage.getAddress()
+  console.log("=====> deployed contract", contractAdress, "check it out on https://etherscan.io")
+  
+  console.log("=====> network is: ", network.config.chainId === 4 ? "rinkeby" : network.config.chainId === 11155111 ? "sepolia" : "hardhat or ganache")
+  if(network.config.chainId === 4 && process.env.ETHERSCAN_API_KEY) {
+    // rinkeby
+    await simpleStorage.deploymentTransaction()!.wait(6)
+    await verify(await simpleStorage.getAddress(), [])
+  } else if(network.config.chainId === 11155111 && process.env.ETHERSCAN_API_KEY) {
+    // sepolia
+    await simpleStorage.deploymentTransaction()!.wait(6)
+    await verify(await simpleStorage.getAddress(), [])
+  }
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
-
-  await lock.waitForDeployment();
-
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+  /* get current favorite number */
+  const currentValue = await simpleStorage.retrieve()
+  console.log("=====> current favorite number value is: ", currentValue.toString())
+  
+  /* update current favorite number */
+  console.log("=====> storing a new favorite number value...")
+  const txResponse = await simpleStorage.store("8")
+  await txResponse.wait(1)
+  
+  /* get updated favorite number */
+  const updatedValue = await simpleStorage.retrieve()
+  console.log("=====> updated favorite number value is: ", updatedValue.toString())
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+async function verify(contractAddress: string, args: any) {
+  console.log("=====> verifying contract ...")
+
+  try {    
+    await run("verify:verify", {
+      address: contractAddress,
+      constructorArguments: args
+    })
+  } catch (error: any) {
+    if (error.message.toLowerCase().includes("=====> already verified")) {
+      console.log("=====> verification failed")
+    } else {
+      console.log(error)
+    }
+  }
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  });
