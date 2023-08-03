@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   // prettier-ignore
   const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(providerUrl);
   // wallet
-  const wallet: Wallet = new Wallet(process.env.PRIVATE_KEY!, provider);
+  const wallet: Wallet = new Wallet(process.env.PRIVATE_KEY!, provider)
   // const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf-8")
   // let wallet: Wallet = new Wallet.fromEncryptedJsonSync(
   //   encryptedJson,
@@ -31,11 +31,11 @@ async function main(): Promise<void> {
   // );
   const abi: string = fs.readFileSync(
     "./SimpleStorage_sol_SimpleStorage.abi",
-    "utf8"
+    "utf8",
   )
   const binary: string = fs.readFileSync(
     "./SimpleStorage_sol_SimpleStorage.bin",
-    "utf8"
+    "utf8",
   )
 
   const contractFactory = new ContractFactory(abi, binary, wallet)
@@ -49,12 +49,14 @@ async function main(): Promise<void> {
   /* deploy the actual contract */
   const contract: Contract = await contractFactory.deploy(deploymentOptions)
   console.log("=====> contract", contract)
+  console.log("=====> contract address", contract.address)
 
+  // prettier-ignore
   const transactionReceipt: ethers.providers.TransactionReceipt =
     await contract.deployTransaction.wait(1)
 
   console.log(
-    "=====> This is the deployment transaction (transaction response): "
+    "=====> This is the deployment transaction (transaction response): ",
   )
   console.log(contract.deployTransaction)
 
@@ -87,7 +89,7 @@ async function main(): Promise<void> {
   const currentFavoriteNumber: ContractFunction = await contract.retrieve()
   console.log(
     "=====> currentFavoriteNumber is: ",
-    currentFavoriteNumber.toString()
+    currentFavoriteNumber.toString(),
   )
 
   // store a new favorite number
@@ -98,7 +100,7 @@ async function main(): Promise<void> {
   const updatedFavoriteNumber: ContractFunction = await contract.retrieve()
   console.log(
     "=====> updatedFavoriteNumber is: ",
-    updatedFavoriteNumber.toString()
+    updatedFavoriteNumber.toString(),
   )
 }
 
