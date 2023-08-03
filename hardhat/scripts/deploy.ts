@@ -9,15 +9,17 @@ async function main() {
   await simpleStorage.waitForDeployment()
 
   const contractAdress = await simpleStorage.getAddress()
-  console.log("=====> deployed contract", contractAdress, "check it out on https://etherscan.io")
+  console.log("=====> deployed contract address is: ", contractAdress, network.config.chainId === 4 ? "check it out on https://rinkeby.etherscan.io" : network.config.chainId === 11155111 ? "check it out on https://sepolia.etherscan.io" : "")
   
   console.log("=====> network is: ", network.config.chainId === 4 ? "rinkeby" : network.config.chainId === 11155111 ? "sepolia" : "hardhat or ganache")
   if(network.config.chainId === 4 && process.env.ETHERSCAN_API_KEY) {
     // rinkeby
+    console.log("=====> waiting for blocks to be confirmed...")
     await simpleStorage.deploymentTransaction()!.wait(6)
     await verify(await simpleStorage.getAddress(), [])
   } else if(network.config.chainId === 11155111 && process.env.ETHERSCAN_API_KEY) {
     // sepolia
+    console.log("=====> waiting for blocks to be confirmed...")
     await simpleStorage.deploymentTransaction()!.wait(6)
     await verify(await simpleStorage.getAddress(), [])
   }
