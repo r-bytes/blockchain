@@ -1,8 +1,21 @@
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
+import "./tasks/block-number";
 
 import "dotenv/config"
+
+// this is a sample Hardhat task. To learn more about how to create your own go to
+// https://hardhat.org/guides/create-task.html
+task("balance", "Prints an account's balance").setAction(async () => {});
+
+task("accounts", "Prints a list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.ethers.getSigners()
+
+  for (const account of accounts) {
+    console.log("=====> accounts: ", account.address)
+  }
+})
 
 const RPC_URL_SEPOLIA: string = process.env.RPC_URL_SEPOLIA!
 const PRIVATE_KEY: string = process.env.PRIVATE_KEY!
