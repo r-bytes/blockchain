@@ -1,7 +1,7 @@
-import { ethers, run, network } from "hardhat"
+import { ethers } from "hardhat"
 import { SimpleStorage, SimpleStorage__factory } from "../typechain-types"
 import { expect, assert } from "chai"
-import { ContractTransactionReceipt, ContractTransactionResponse } from "ethers"
+import { ContractTransactionResponse } from "ethers"
 
 describe("SimpleStorage", function () {
   let simpleStorageFactory: SimpleStorage__factory, simpleStorage: SimpleStorage
@@ -28,5 +28,19 @@ describe("SimpleStorage", function () {
     await transactionResponse.wait(1)
     const currentValue: bigint = await simpleStorage.retrieve()
     expect(currentValue).to.equal(expectedValue)
+  })
+
+  it("Should add a new person with a favorite number to the people array", async () => {
+    const transactionResponse: ContractTransactionResponse = await simpleStorage.addPerson("satoshi", "21000000")
+    await transactionResponse.wait(1)
+
+    const expectedValue: string = "21000000"
+    const nameToFavoriteNumberValue: string = (await simpleStorage.nameToFavoriteNumber("satoshi")).toString()
+    const firstPersonPeopleArrFavoriteNumber: string = ((await simpleStorage.people(0)).favoriteNumber).toString()
+    // const testValue = 8
+    
+    assert.equal(nameToFavoriteNumberValue, expectedValue)
+    assert.equal(firstPersonPeopleArrFavoriteNumber, expectedValue)
+    // assert.equal(testValue.toString(), "1")
   })
 })
