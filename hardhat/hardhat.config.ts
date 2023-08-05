@@ -2,6 +2,8 @@ import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
 import "./tasks/block-number";
+import "hardhat-gas-reporter"
+import "solidity-coverage"
 
 import "dotenv/config"
 
@@ -17,11 +19,11 @@ task("accounts", "Prints a list of accounts", async (taskArgs, hre) => {
   }
 })
 
-const RPC_URL_SEPOLIA: string = process.env.RPC_URL_SEPOLIA!
-const PRIVATE_KEY: string = process.env.PRIVATE_KEY!
-const RPC_URL_GANACHE: string = process.env.RPC_URL_GANACHE!
-const PRIVATE_KEY_GANACHE: string = process.env.PRIVATE_KEY_GANACHE!
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY!
+const RPC_URL_SEPOLIA: string = process.env.RPC_URL_SEPOLIA || "http://example.etherscan.io";
+const PRIVATE_KEY: string = process.env.PRIVATE_KEY ||"0xkey"
+const RPC_URL_GANACHE: string = process.env.RPC_URL_GANACHE ||"key"
+const PRIVATE_KEY_GANACHE: string = process.env.PRIVATE_KEY_GANACHE ||"key"
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY ||"key"
 
 const config: HardhatUserConfig = {
   solidity: "0.8.19",
@@ -45,6 +47,14 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY
+  },
+  gasReporter: {
+    enabled: true,
+    outputFile: "report-gas.txt",
+    noColors: true,
+    // currency: "USD",
+    // coinmarketcap: COINMARKETCAP_API_KEY,
+    token: "MATIC"
   }
 };
 
