@@ -12,13 +12,6 @@ library PriceConverter {
         return uint256(price * 1e10); // 1**10 == 10000000000
     }
 
-    function getVersion() internal view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(
-            0x694AA1769357215DE4FAC081bf1f309aDC325306
-        );
-        return priceFeed.version();
-    }
-
     // prettier-ignore
     function getConversionRate(uint256 ethAmount, AggregatorV3Interface priceFeed) internal view returns (uint256) {
       uint256 ethPrice = getPrice(priceFeed);
