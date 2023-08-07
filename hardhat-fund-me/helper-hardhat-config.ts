@@ -6,7 +6,7 @@ interface NetworkConfigItem {
   ethUsdPriceFeed: string
 }
 
-const networkConfig: NetworkConfig = {
+export const networkConfig: NetworkConfig = {
   "1": {
     name: "main",
     ethUsdPriceFeed: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
@@ -25,8 +25,9 @@ const networkConfig: NetworkConfig = {
   },
   "31337": {
     name: "hardhat",
-    ethUsdPriceFeed: "0x"
+    ethUsdPriceFeed: "0x",
   },
 }
-
-export default networkConfig
+export const developmentChains = ["hardhat", "ganache", "localhost"]
+export const DECIMALS = 8
+export const INITIAL_ANSWER = 200000000000
