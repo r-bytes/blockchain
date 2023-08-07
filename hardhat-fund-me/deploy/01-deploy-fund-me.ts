@@ -7,34 +7,39 @@ import { developmentChains, networkConfig } from "../helper-hardhat-config"
 const deployFunc: DeployFunction = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log, get } = deployments
   const { deployer } = await getNamedAccounts()
+  
+  let ethUsdPriceFeed: string = "";
   const chainId: number = network.config.chainId!
-  console.log("=====> network is: ", chainId)
+  log("=====> network is: ", network.name)
+  log("=====> chainId is: ", chainId)
 
-  let ethUsdPriceFeed: string;
 
+  // check if we are on a development chain
+  // if so, we should use mocks
   if (developmentChains.includes(network.name)) {
+    // wait for and return address from mock
     const ethUsdAggregator: string = (await get("MockV3Aggregator")).address
     ethUsdPriceFeed = ethUsdAggregator
   } else {
     ethUsdPriceFeed = networkConfig[chainId]["ethUsdPriceFeed"]
   }
-  log("----------------------------------------------------")
+  log("")
+  log("=====> ----------------------------------------------------------------")
 
-  // if chainId is X use priceFeed Y
-  // if chainId is Z use priceFeed A
-
-  // if contract doesnt exist, create minimal version for local testing
-
-
-
-  // what happens if we want to change chains
-  // when working with localhost or hh we want to use mocks
+  log("")
   log("=====> deploying FundMe and waiting for confirmations...")
   const fundMe: DeployResult = await deploy("FundMe", {
     from: deployer,
-    args: [], // priceFeedAddress
+    args: [ethUsdPriceFeed], // priceFeedAddress
     log: true,
   })
+
+  // log("=====> receipt: ", fundMe.receipt)
+  log("")
+  log("=====> ----------------------------------------------------------------")
+
 }
 
 export default deployFunc
+
+deployFunc.tags = ["all", "mocks"]

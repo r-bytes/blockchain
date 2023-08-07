@@ -1,6 +1,10 @@
 import { DeployFunction } from "hardhat-deploy/types"
 import { deployments, network } from "hardhat"
-import { developmentChains, DECIMALS, INITIAL_ANSWER } from "../helper-hardhat-config"
+import {
+  developmentChains,
+  DECIMALS,
+  INITIAL_ANSWER,
+} from "../helper-hardhat-config"
 
 // prettier-ignore
 const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) => {
@@ -10,9 +14,13 @@ const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) =>
   const chainId: number = network.config.chainId!
 
   if(developmentChains.includes(network.name)) {
-    log("Local network detected, deploying mocks....")
+    log("")
+    log("=====> ----------------------------------------------------------------")
+    log("")
+    log("=====> local network detected")
+    log("=====> deploying mocks...")
 
-    await deploy("MockV3Agrregator", {
+    await deploy("MockV3Aggregator", {
       contract: "MockV3Aggregator",
       from: deployer,
       log: true,
@@ -20,7 +28,11 @@ const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) =>
     })
 
     log("=====> mocks deployed!")
+    log("")
+
     log("=====> ----------------------------------------------------------------")
+    log("")
+
   }
 }
 
