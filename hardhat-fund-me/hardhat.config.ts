@@ -1,5 +1,8 @@
 import { HardhatUserConfig } from "hardhat/config"
+// import "@nomiclabs/hardhat-waffle"
 import "@nomicfoundation/hardhat-toolbox"
+import "@nomicfoundation/hardhat-verify"
+import "hardhat-gas-reporter"
 import "hardhat-deploy"
 
 import "dotenv/config"
@@ -38,7 +41,7 @@ const config: HardhatUserConfig = {
     apiKey: ETHERSCAN_API_KEY,
   },
   gasReporter: {
-    enabled: true,
+    enabled: false,
     outputFile: "report-gas.txt",
     noColors: true,
     // currency: "USD",
@@ -48,7 +51,7 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0,
-      11155111: 1,
+      // 11155111: 1,
     },
     user: {
       default: 1,
