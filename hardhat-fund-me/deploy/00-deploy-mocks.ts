@@ -15,7 +15,7 @@ const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) =>
 
   if(developmentChains.includes(network.name)) {
     log("")
-    log("=====> ----------------------------------------------------------------")
+    log("----------------------------------------------------------------")
     log("")
     log("=====> local network detected")
     log("=====> deploying mocks...")
@@ -30,7 +30,7 @@ const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) =>
     log("=====> mocks deployed!")
     log("")
 
-    log("=====> ----------------------------------------------------------------")
+    log("----------------------------------------------------------------")
     log("")
 
   }
