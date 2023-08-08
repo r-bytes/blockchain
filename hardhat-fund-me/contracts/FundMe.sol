@@ -1,27 +1,61 @@
 // SPDX-License-Identifier: MIT
+// Pragma
 pragma solidity 0.8.19;
+// Imports
 import "./PriceConverter.sol";
+// Interfaces, Libraries
 
-error NotOwner();
+// Error codes
+error FundMe__NotOwner();
 
+/** @title A contract for crowd funding
+ *  @author r-bytes
+ *  @notice This contract is to demo a funding contract
+ *  @dev This implements price feeds as a library
+ */
 contract FundMe {
+  // Type declarations
   // use PriceConverter as a library
   using PriceConverter for uint256;
 
-  uint256 public constant MINIMUN_USD = 50 * 1e18; // 1 * 10 ** 18
-
+  // State variables
+  mapping(address => uint256) public AddressToAmountFunded;
   address[] public funders;
   address public immutable i_owner;
-
-  mapping(address => uint256) public AddressToAmountFunded;
-
+  uint256 public constant MINIMUN_USD = 50 * 1e18; // 1 * 10 ** 18
   AggregatorV3Interface public priceFeed;
+
+  // Modifiers
+  // only owners can withdraw
+  modifier onlyOwner() {
+    // check this first
+    if (msg.sender == i_owner) {
+      revert FundMe__NotOwner();
+    }
+    // continue with the rest of the function
+    _;
+  }
+
+  // Functions order: constructor, receive, fallback, external, public, internal, private, view, pure
 
   constructor(address priceFeedAddress) {
     i_owner = msg.sender;
     priceFeed = AggregatorV3Interface(priceFeedAddress);
   }
 
+  // senders should always use the fund function when sending eth
+  receive() external payable {
+    fund();
+  }
+
+  fallback() external payable {
+    fund();
+  }
+
+  /**
+   *  @notice This function funds this contract
+   *  @dev This implements price feeds as a library
+   */
   // get funds from user
   function fund() public payable {
     // set a minimum amount of funding value in USD
@@ -52,24 +86,5 @@ contract FundMe {
       value: address(this).balance
     }("");
     require(callSuccess, "call failed");
-  }
-
-  // only owners can withdraw
-  modifier onlyOwner() {
-    // check this first
-    if (msg.sender == i_owner) {
-      revert NotOwner();
-    }
-    // continue with the rest of the function
-    _;
-  }
-
-  // senders should always use the fund function when sending eth
-  receive() external payable {
-    fund();
-  }
-
-  fallback() external payable {
-    fund();
   }
 }
