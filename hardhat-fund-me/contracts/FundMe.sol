@@ -1,42 +1,34 @@
 // SPDX-License-Identifier: MIT
-// Pragma
 pragma solidity 0.8.19;
-// Imports
 import "./PriceConverter.sol";
-// Interfaces, Libraries
 
-// Error codes
+// error codes
 error FundMe__NotOwner();
 
 /** @title A contract for crowd funding
  *  @author r-bytes
  *  @notice This contract is to demo a funding contract
  *  @dev This implements price feeds as a library
+ *  @dev functions order: constructor, receive, fallback, external, public, internal, private, view, pure
  */
 contract FundMe {
-  // Type declarations
-  // use PriceConverter as a library
+  // libraries
   using PriceConverter for uint256;
 
-  // State variables
+  // state variables
   mapping(address => uint256) public AddressToAmountFunded;
   address[] public funders;
   address public immutable i_owner;
   uint256 public constant MINIMUN_USD = 50 * 1e18; // 1 * 10 ** 18
   AggregatorV3Interface public priceFeed;
 
-  // Modifiers
-  // only owners can withdraw
+  // modifiers
   modifier onlyOwner() {
-    // check this first
     if (msg.sender == i_owner) {
       revert FundMe__NotOwner();
     }
-    // continue with the rest of the function
     _;
   }
-
-  // Functions order: constructor, receive, fallback, external, public, internal, private, view, pure
 
   constructor(address priceFeedAddress) {
     i_owner = msg.sender;
@@ -56,10 +48,11 @@ contract FundMe {
    *  @notice This function funds this contract
    *  @dev This implements price feeds as a library
    */
+  
   // get funds from user
   function fund() public payable {
-    // set a minimum amount of funding value in USD
     require(
+      // set a minimum amount of funding value in USD
       // this library automatically passes the ethAmount to msg.value (first param)
       msg.value.getConversionRate(priceFeed) >= MINIMUN_USD,
       "Didn't send enough"
