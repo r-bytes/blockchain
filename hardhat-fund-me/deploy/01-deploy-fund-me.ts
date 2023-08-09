@@ -33,10 +33,10 @@ const deployFunc: DeployFunction = async ({ getNamedAccounts, deployments, netwo
     from: deployer,
     args: [ethUsdPriceFeed], // priceFeedAddress goes here
     log: true,
-    waitConfirmations: 6
+    waitConfirmations: 1,
   })
 
-  if (!developmentChains.includes("network.name") && process.env.ETHERSCAN_API_KEY) {
+  if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
     // verify the contract
     await verify(fundMe.address, [ethUsdPriceFeed])
   }
