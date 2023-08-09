@@ -1,8 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config"
-// import "@nomiclabs/hardhat-waffle"
 import "@nomicfoundation/hardhat-toolbox"
-import "@nomicfoundation/hardhat-verify"
-import "hardhat-gas-reporter"
 import "hardhat-deploy"
 
 import "dotenv/config"
