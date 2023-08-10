@@ -4,7 +4,10 @@ import { assert, expect } from "chai";
 import { developmentChains } from "../../helper-hardhat-config";
 import { log } from "console";
 import { Address, DeployFunction } from "hardhat-deploy/types";
-import { ContractTransactionResponse } from "ethers";
+import {
+    ContractTransactionReceipt,
+    ContractTransactionResponse,
+} from "ethers";
 
 describe("FundMe", async () => {
     let fundMe: FundMe;
@@ -26,12 +29,6 @@ describe("FundMe", async () => {
             // get contract by name
             // fundMe = await ethers.getContractAt("FundMe", deployer); 
         */
-
-        // get deployer address from deployment results
-        // log("=====> deploymentResults 1: ", deploymentResults["FundMe"])
-        // log("=====> deploymentResults 2: ", deploymentResults["FundMe"]["receipt"]?.from) // 66
-        // log("=====> deploymentResults 3: ", deploymentResults["FundMe"]?.address) // 12
-        // log("=====> deploymentResults 4: ", deployer) // 66
         const fundMeAddress: Address = deploymentResults["FundMe"]?.address; // 12
         const mockV3AggregatorAddress: Address =
             deploymentResults["MockV3Aggregator"]?.address;
@@ -79,15 +76,45 @@ describe("FundMe", async () => {
             assert(funder, deployer);
         });
     });
-    describe("should withraw the funds from the contract", async () => {
+    describe("withraw", async () => {
         // fund the contract before we test 'it
         beforeEach(async () => {
             const txResponse: ContractTransactionResponse = await fundMe.fund({
                 value: sendValue,
             });
         });
-        it("should add", async () => {
-            ("");
+
+        it("withraw ETH from a single founder out of the contract", async () => {
+            const [owner, otherAccount] = await ethers.getSigners();
+            // arrange the test
+            const startingFundMeBalance: bigint =
+                await ethers.provider.getBalance(await fundMe.getAddress());
+
+            const startingOwnerBalance: bigint =
+                await ethers.provider.getBalance(owner);
+
+            // act
+            const txResponse: ContractTransactionResponse = await fundMe
+                .connect(owner)
+                .withdraw();
+            const txReceipt: ContractTransactionReceipt =
+                (await txResponse.wait(1)) as ContractTransactionReceipt;
+            const { gasPrice, gasUsed } = txReceipt;
+            const gasCost = gasUsed * gasPrice;
+
+            const fundMeBalanceEnd: bigint = await ethers.provider.getBalance(
+                fundMe.getAddress(),
+            );
+
+            const endingOwnerBalance: bigint = await ethers.provider.getBalance(
+                owner,
+            );
+
+            assert.equal(fundMeBalanceEnd, 0n);
+            assert.equal(
+                startingOwnerBalance + startingFundMeBalance,
+                endingOwnerBalance + gasCost,
+            );
         });
     });
 });
