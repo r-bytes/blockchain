@@ -24,7 +24,7 @@ contract FundMe {
 
     // modifiers
     modifier onlyOwner() {
-        if (msg.sender == i_owner) {
+        if (msg.sender != i_owner) {
             revert FundMe__NotOwner();
         }
         _;
