@@ -16,11 +16,11 @@ contract FundMe {
     using PriceConverter for uint256;
 
     // state variables
-    mapping(address => uint256) public AddressToAmountFunded;
-    address[] public funders;
+    mapping(address => uint256) public s_addressToAmountFunded;
+    address[] public s_funders;
     address public immutable i_owner;
     uint256 public constant MINIMUN_USD = 50 * 1e18; // 1 * 10 ** 18
-    AggregatorV3Interface public priceFeed;
+    AggregatorV3Interface public s_priceFeed;
 
     // modifiers
     modifier onlyOwner() {
@@ -32,7 +32,7 @@ contract FundMe {
 
     constructor(address priceFeedAddress) {
         i_owner = msg.sender;
-        priceFeed = AggregatorV3Interface(priceFeedAddress);
+        s_priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     // senders should always use the fund function when sending eth
@@ -54,13 +54,13 @@ contract FundMe {
         require(
             // set a minimum amount of funding value in USD
             // this library automatically passes the ethAmount to msg.value (first param)
-            msg.value.getConversionRate(priceFeed) >= MINIMUN_USD,
+            msg.value.getConversionRate(s_priceFeed) >= MINIMUN_USD,
             "You need to spend more ETH!"
         );
 
         // add funder to funders array and AddressToAmountFunded
-        funders.push(msg.sender);
-        AddressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
+        s_addressToAmountFunded[msg.sender] += msg.value;
     }
 
     // withdraw funds
@@ -68,20 +68,39 @@ contract FundMe {
         // loop over the funders array
         for (
             uint256 funderIndex = 0;
-            funderIndex < funders.length;
+            funderIndex < s_funders.length;
             funderIndex++
         ) {
             // reset the ammount funded per index
-            address funder = funders[funderIndex];
-            AddressToAmountFunded[funder] = 0;
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
         }
         // reset the actual funders array
-        funders = new address[](0);
+        s_funders = new address[](0);
 
         // actually withdraw the funds using call
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
+        require(callSuccess, "call failed");
+    }
+
+    function cheaperWithdraw() public {
+        address[] memory funders = s_funders;
+        
+        // ! mapping can't be in memory
+
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < funders.length;
+            funderIndex++
+        ) {
+            address funder = funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
+        }
+        s_funders = new address[](0);
+
+        (bool callSuccess, ) = i_owner.call{value: address(this).balance}("");
         require(callSuccess, "call failed");
     }
 }
