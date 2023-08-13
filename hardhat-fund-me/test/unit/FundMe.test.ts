@@ -42,11 +42,11 @@ describe("FundMe", async () => {
 
     describe("constructor", async () => {
         it("sets the aggregator addresses correctly", async () => {
-            const priceFeedAddress: Address = await fundMe.priceFeed();
+            const getPriceFeedAddress: Address = await fundMe.getPriceFeed();
             const mockV3AggregatorAddress: Address =
                 await mockV3Aggregator.getAddress();
 
-            assert.equal(priceFeedAddress, mockV3AggregatorAddress);
+            assert.equal(getPriceFeedAddress, mockV3AggregatorAddress);
         });
     });
 
@@ -60,18 +60,18 @@ describe("FundMe", async () => {
             const txResponse: ContractTransactionResponse = await fundMe.fund({
                 value: sendValue,
             });
-            const response: bigint = await fundMe.AddressToAmountFunded(
+            const response: bigint = await fundMe.getAddressToAmountFunded(
                 deployer,
             );
 
             // assert.equal(txResponse.from, deployer)
             assert.equal(response, sendValue);
         });
-        it("should add funder to array of funders", async () => {
+        it("should add funder to array of getFunders", async () => {
             const txResponse: ContractTransactionResponse = await fundMe.fund({
                 value: sendValue,
             });
-            const funder: Address = await fundMe.funders(0);
+            const funder: Address = await fundMe.getFunders(0);
 
             assert(funder, deployer);
         });
@@ -84,7 +84,7 @@ describe("FundMe", async () => {
             });
         });
 
-        it("withraw ETH from a single founder out of the contract", async () => {
+        it("withraw ETH from a single funder out of the contract", async () => {
             const [owner] = await ethers.getSigners();
             // arrange the test
             const startingFundMeBalance: bigint =
@@ -117,7 +117,7 @@ describe("FundMe", async () => {
             );
         });
 
-        it("allows to withdraw funds with multiple funders", async () => {
+        it("allows to withdraw funds with multiple getFunders", async () => {
             // arrange
             const accounts = await ethers.getSigners();
 
@@ -157,12 +157,12 @@ describe("FundMe", async () => {
                 endingOwnerBalance + gasCost,
             );
 
-            // make sure that the funders are reset properly
-            await expect(fundMe.funders(0)).to.be.reverted;
+            // make sure that the getFunders are reset properly
+            await expect(fundMe.getFunders(0)).to.be.reverted;
 
             for (let i = 1; i < 6; i++) {
                 assert.equal(
-                    await fundMe.AddressToAmountFunded(accounts[i].address),
+                    await fundMe.getAddressToAmountFunded(accounts[i].address),
                     0n,
                 );
             }
@@ -179,6 +179,92 @@ describe("FundMe", async () => {
                 attackerConnectedContract,
                 "FundMe__NotOwner",
             );
+        });
+
+
+
+        it("cheaperWithdraw single funder", async () => {
+            const [owner] = await ethers.getSigners();
+            // arrange the test
+            const startingFundMeBalance: bigint =
+                await ethers.provider.getBalance(await fundMe.getAddress());
+
+            const startingOwnerBalance: bigint =
+                await ethers.provider.getBalance(owner);
+
+            // act
+            const txResponse: ContractTransactionResponse = await fundMe
+                .connect(owner)
+                .cheaperWithdraw();
+            const txReceipt: ContractTransactionReceipt =
+                (await txResponse.wait(1)) as ContractTransactionReceipt;
+            const { gasPrice, gasUsed } = txReceipt;
+            const gasCost = gasUsed * gasPrice;
+
+            const fundMeBalanceEnd: bigint = await ethers.provider.getBalance(
+                fundMe.getAddress(),
+            );
+
+            const endingOwnerBalance: bigint = await ethers.provider.getBalance(
+                owner,
+            );
+
+            assert.equal(fundMeBalanceEnd, 0n);
+            assert.equal(
+                startingOwnerBalance + startingFundMeBalance,
+                endingOwnerBalance + gasCost,
+            );
+        });
+
+        it("cheaperWithdraw multiple funders", async () => {
+            // arrange
+            const accounts = await ethers.getSigners();
+
+            for (let i = 1; i < 6; i++) {
+                const fundMeConnectedContract: ContractTransactionResponse =
+                    await fundMe.connect(accounts[i]).fund({
+                        value: sendValue,
+                    });
+            }
+
+            const startingFundMeBalance: bigint =
+                await ethers.provider.getBalance(await fundMe.getAddress());
+
+            const startingOwnerBalance: bigint =
+                await ethers.provider.getBalance(deployer);
+
+            // act
+            const txResponse: ContractTransactionResponse =
+                await fundMe.cheaperWithdraw();
+            const txReceipt: ContractTransactionReceipt =
+                (await txResponse.wait(1)) as ContractTransactionReceipt;
+            const { gasPrice, gasUsed } = txReceipt;
+            const gasCost = gasUsed * gasPrice;
+
+            // assert
+            const fundMeBalanceEnd: bigint = await ethers.provider.getBalance(
+                fundMe.getAddress(),
+            );
+
+            const endingOwnerBalance: bigint = await ethers.provider.getBalance(
+                deployer,
+            );
+
+            assert.equal(fundMeBalanceEnd, 0n);
+            assert.equal(
+                startingOwnerBalance + startingFundMeBalance,
+                endingOwnerBalance + gasCost,
+            );
+
+            // make sure that the getFunders are reset properly
+            await expect(fundMe.getFunders(0)).to.be.reverted;
+
+            for (let i = 1; i < 6; i++) {
+                assert.equal(
+                    await fundMe.getAddressToAmountFunded(accounts[i].address),
+                    0n,
+                );
+            }
         });
     });
 });
