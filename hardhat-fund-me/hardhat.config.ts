@@ -5,11 +5,12 @@ import "hardhat-deploy"
 import "dotenv/config"
 
 // prettier-ignore
-const RPC_URL_SEPOLIA: string = process.env.RPC_URL_SEPOLIA!
-const PRIVATE_KEY: string = process.env.PRIVATE_KEY!
-const RPC_URL_GANACHE: string = process.env.RPC_URL_GANACHE!
-const PRIVATE_KEY_GANACHE: string = process.env.PRIVATE_KEY_GANACHE!
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY!
+const RPC_URL_SEPOLIA: string = process.env.RPC_URL_SEPOLIA || "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}"
+const PRIVATE_KEY: string = process.env.PRIVATE_KEY || "01010101010101010101010101010101001"
+const RPC_URL_GANACHE: string = process.env.RPC_URL_GANACHE || "0x01010101010101010101010101010101001"
+const PRIVATE_KEY_GANACHE: string = process.env.PRIVATE_KEY_GANACHE || "01010101010101010101010101010101001"
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || ""
+const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY!
 
 const config: HardhatUserConfig = {
   // solidity: "0.8.19",
@@ -38,11 +39,11 @@ const config: HardhatUserConfig = {
     apiKey: ETHERSCAN_API_KEY,
   },
   gasReporter: {
-    enabled: false,
+    enabled: true,
     outputFile: "report-gas.txt",
     noColors: true,
-    // currency: "USD",
-    // coinmarketcap: COINMARKETCAP_API_KEY,
+    currency: "USD",
+    coinmarketcap: COINMARKETCAP_API_KEY,
     token: "MATIC",
   },
   namedAccounts: {
