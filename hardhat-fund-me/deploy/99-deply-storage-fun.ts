@@ -1,35 +1,41 @@
-import { DeployFunction, DeployResult } from "hardhat-deploy/types"
+import { DeployFunction, DeployResult } from "hardhat-deploy/types";
 
-const { network, ethers } = require("hardhat")
-const { developmentChains } = require("../helper-hardhat-config")
-const { verify } = require("../utils/verify")
+const { network, ethers } = require("hardhat");
+const { developmentChains } = require("../helper-hardhat-config");
+const { verify } = require("../utils/verify");
 
-const deployStorageFun: DeployFunction = async ({ getNamedAccounts , deployments }) => {
-    const { deploy, log } = deployments
-    const { deployer } = await getNamedAccounts()
+const deployStorageFun: DeployFunction = async ({
+    getNamedAccounts,
+    deployments,
+}) => {
+    const { deploy, log } = deployments;
+    const { deployer } = await getNamedAccounts();
 
-    log("----------------------------------------------------")
-    log("Deploying FunWithStorage and waiting for confirmations...")
+    log("----------------------------------------------------");
+    log("Deploying FunWithStorage and waiting for confirmations...");
     const funWithStorage: DeployResult = await deploy("FunWithStorage", {
         from: deployer,
         args: [],
         log: true,
         // we need to wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
-    })
-    
-    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(funWithStorage.address, [])
+    });
+
+    if (
+        !developmentChains.includes(network.name) &&
+        process.env.ETHERSCAN_API_KEY
+    ) {
+        await verify(funWithStorage.address, []);
     }
 
-    log("Logging storage...")
+    log("Logging storage...");
     for (let i = 0; i < 10; i++) {
         log(
             `Location ${i}: ${await ethers.provider.getStorage(
                 funWithStorage.address,
-                i
-            )}`
-        )
+                i,
+            )}`,
+        );
     }
 
     // You can use this to trace!
@@ -52,7 +58,7 @@ const deployStorageFun: DeployFunction = async ({ getNamedAccounts , deployments
 
     // Can you write a function that finds the storage slot of the arrays and mappings?
     // And then find the data in those slots?
-}
-export default deployStorageFun
+};
+export default deployStorageFun;
 
-deployStorageFun.tags = ["storage"]
+deployStorageFun.tags = ["storage"];

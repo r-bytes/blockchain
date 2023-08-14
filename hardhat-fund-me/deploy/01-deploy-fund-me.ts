@@ -1,7 +1,7 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types"
-import { DeployFunction, DeployResult } from "hardhat-deploy/types"
-import { developmentChains, networkConfig } from "../helper-hardhat-config"
-import { verify } from "../utils/verify"
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DeployFunction, DeployResult } from "hardhat-deploy/types";
+import { developmentChains, networkConfig } from "../helper-hardhat-config";
+import { verify } from "../utils/verify";
 
 // prettier-ignore
 const deployFunc: DeployFunction = async ({ getNamedAccounts, deployments, network }) => {
@@ -46,6 +46,6 @@ const deployFunc: DeployFunction = async ({ getNamedAccounts, deployments, netwo
   log("----------------------------------------------------------------")
 }
 
-export default deployFunc
+export default deployFunc;
 
-deployFunc.tags = ["all", "mocks"]
+deployFunc.tags = ["all", "mocks"];

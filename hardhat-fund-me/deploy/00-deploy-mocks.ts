@@ -1,10 +1,10 @@
-import { DeployFunction } from "hardhat-deploy/types"
-import { deployments, network } from "hardhat"
+import { DeployFunction } from "hardhat-deploy/types";
+import { deployments, network } from "hardhat";
 import {
-  developmentChains,
-  DECIMALS,
-  INITIAL_ANSWER,
-} from "../helper-hardhat-config"
+    developmentChains,
+    DECIMALS,
+    INITIAL_ANSWER,
+} from "../helper-hardhat-config";
 
 // prettier-ignore
 const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) => {
@@ -36,6 +36,6 @@ const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) =>
   }
 }
 
-export default deployMocks
+export default deployMocks;
 
-deployMocks.tags = ["all", "mocks"]
+deployMocks.tags = ["all", "mocks"];
