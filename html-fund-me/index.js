@@ -1,7 +1,9 @@
 import { ethers } from "./ethers-6.7.0.esm.min.js";
-const addText = (element, text) =>
-    (document.getElementById(element).textContent = text);
 const getEl = (el) => document.getElementById(el);
+const addText = (element, text) => (element.textContent = text);
+
+const connectButton = getEl("btnConnect");
+const fundButton = getEl("btnFund");
 
 const connect = async () => {
     if (typeof window.ethereum != "undefined") {
@@ -10,12 +12,12 @@ const connect = async () => {
                 method: "eth_requestAccounts",
             });
             console.log("=====> account", accounts);
-            addText("btnConnect", "Connected");
+            addText(connectButton, "Connected");
         } catch (error) {
             console.error(error);
         }
     } else {
-        addText("btnConnect", "Please install metamask");
+        addText(connectButton, "Please install metamask");
     }
 };
 
@@ -24,8 +26,5 @@ const fund = async (ethAmount) => {
     console.log(deployer);
 };
 
-const connectButton = getEl("btnConnect");
-const fundButton = getEl("btnFund");
-
-connectButton.onclick = connect
-fundButton.onclick = fund
+connectButton.onclick = connect;
+fundButton.onclick = fund;
