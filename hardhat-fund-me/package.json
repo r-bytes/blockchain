@@ -1,4 +1,7 @@
 {
+  "name:": "hardhat fundMe",
+  "author": "r-bytes",
+  "version": "1.0.0",
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
@@ -31,7 +34,8 @@
     "test:staging": "yarn hardhat test --network sepolia",
     "lint": "yarn solhint 'contracts/*.sol'",
     "lint:fix": "yarn solhint 'contracts/*.sol' --fix",
-    "format": "yarn prettier --write ."
+    "format": "yarn prettier --write .",
+    "coverage": "yarn hardhat coverage"
   },
   "dependencies": {}
 }
