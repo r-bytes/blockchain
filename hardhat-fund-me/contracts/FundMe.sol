@@ -37,11 +37,11 @@ contract FundMe {
 
     // senders should always use the fund function when sending eth
     receive() external payable {
-        fund();
+        // fund();
     }
 
     fallback() external payable {
-        fund();
+        // fund();
     }
 
     /**
