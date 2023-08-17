@@ -1,6 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import "@nomiclabs/hardhat-etherscan";
+// import "@nomiclabs/hardhat-etherscan";
 import "hardhat-deploy";
 import "hardhat-contract-sizer";
 
