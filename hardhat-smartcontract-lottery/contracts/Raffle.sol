@@ -83,10 +83,14 @@ contract Raffle is VRFConsumerBaseV2 {
         uint256 /* requestId */,
         uint256[] memory randomWords
     ) internal override {
+        // use modulo to fulfill random nummber
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
+
+        // send the balance in the contract
         (bool success, ) = recentWinner.call{value: address(this).balance}("");
+        // require success
         if(!success) {
             revert Raffle__TransferFailed();
         }
