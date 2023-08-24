@@ -24,7 +24,7 @@ error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint25
 
 contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
     // * type declarations
-    enum RaffelState {
+    enum RaffleState {
         OPEN,
         CALCULATING
     }
@@ -38,12 +38,12 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private immutable i_callbackGasLimit;
     uint32 private constant NUMWORDS = 1;
-    uint256 private immutable s_lastTimestamp;
+    uint256 private s_lastTimestamp;
     uint256 private immutable i_interval;
 
     // * lottery variables
     address private s_recentWinner;
-    RaffelState private s_raffelState;
+    RaffleState private s_raffleState;
 
     // * events
     // naming convention function name reversed
@@ -64,7 +64,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
-        s_raffelState = RaffelState.OPEN;
+        s_raffleState = RaffleState.OPEN;
         s_lastTimestamp = block.timestamp;
         i_interval = interval;
     }
@@ -73,7 +73,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
         if (msg.value < i_entranceFee) {
             revert Raffle__NotEnoughETHEntered();
         }
-        if (s_raffelState != RaffelState.OPEN) {
+        if (s_raffleState != RaffleState.OPEN) {
             revert Raffle__NotOpen();
         }
         // push sender to array and typecast as payable
@@ -93,14 +93,14 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
      * 4. our subscription is funded with LINK
      */
     function checkUpkeep(
-        bytes calldata /* checkData */
-    ) public override returns (bool upkeepNeeded, bytes memory /* performData */) {
-        bool isOpen = (RaffelState.OPEN == s_raffelState);
+        bytes memory /* checkData */
+    ) public view override returns (bool upkeepNeeded, bytes memory /* performData */) {
+        bool isOpen = (RaffleState.OPEN == s_raffleState);
         // (block.timestamp - lastBlockTimestamp) > interval
         bool timePassed = ((block.timestamp - s_lastTimestamp) > i_interval);
         bool hasPlayers = (s_players.length > 0);
         bool hasBallance = address(this).balance > 0;
-        bool upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBallance && hasPlayers);
+        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBallance && hasPlayers);
     }
 
     function performUpkeep(bytes calldata /* performData */) external override {
@@ -108,12 +108,16 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
         (bool upkeepNeeded, ) = checkUpkeep("");
 
         if (!upkeepNeeded) {
-            Raffle__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_raffelState));
+            revert Raffle__UpkeepNotNeeded(
+                address(this).balance,
+                s_players.length,
+                uint256(s_raffleState)
+            );
         }
 
         // request random number
         // will revert if subscription is not set and funded.
-        s_raffelState = RaffelState.CALCULATING;
+        s_raffleState = RaffleState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane, // gasLane
             i_subscriptionId,
@@ -136,7 +140,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
         s_recentWinner = recentWinner;
 
         // reset raffle state, players array and lastTimestamp
-        s_raffelState = RaffelState.OPEN;
+        s_raffleState = RaffleState.OPEN;
         s_players = new address payable[](0);
         s_lastTimestamp = block.timestamp;
 
