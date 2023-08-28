@@ -18,6 +18,46 @@ const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY!;
 
 const config: HardhatUserConfig = {
     solidity: "0.8.19",
+    namedAccounts: {
+        deployer: {
+            default: 0,
+        },
+        player: {
+            default: 1,
+        },
+    },
+    defaultNetwork: "hardhat",
+    networks: {
+        hardhat: {
+            chainId: 31337,
+        },
+        sepolia: {
+            chainId: 11155111,
+            url: RPC_URL_SEPOLIA,
+            accounts: [PRIVATE_KEY],
+        },
+        ganache: {
+            chainId: 1337,
+            url: RPC_URL_GANACHE,
+            accounts: [PRIVATE_KEY_GANACHE],
+        },
+        localhost: {
+            chainId: 31337,
+            url: "http://127.0.0.1:8545/",
+        },
+    },
+    etherscan: {
+        apiKey: ETHERSCAN_API_KEY,
+    },
+    gasReporter: {
+        enabled: true,
+        outputFile: "report-gas.txt",
+        noColors: true,
+        currency: "USD",
+        coinmarketcap: COINMARKETCAP_API_KEY,
+        token: "ETH",
+        // token: "MATIC",
+    },
 };
 
 export default config;
