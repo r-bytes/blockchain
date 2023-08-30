@@ -19,17 +19,17 @@ const deployRaffle: DeployFunction = async ({ getNamedAccounts, deployments, net
     if (developmentChains.includes(network.name)) {
         vrfCoordinatorV2Mock = await ethers.getContractAt("VRFCoordinatorV2Mock", deployer);
         vrfCoordinatorV2Adress = vrfCoordinatorV2Mock.target;
+        
         // create a subscription programmatically
-        const transactionResponse: ContractTransactionResponse =
-            await vrfCoordinatorV2Mock.createSubscription();
-        transactionResponse.wait(1);
-        const transactionReceipt: ContractTransactionReceipt = (await transactionResponse.wait(
-            1,
-        )) as ContractTransactionReceipt;
+        const transactionResponse: ContractTransactionResponse = await vrfCoordinatorV2Mock.createSubscription();
+        const transactionReceipt: ContractTransactionReceipt = (await transactionResponse.wait()) as ContractTransactionReceipt;
+        
         // NOT WORKING => transactionReceipt.events[0].args.subId;
         subscriptionId = 1;
+        
         // fund the subscription
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT);
+
     } else {
         vrfCoordinatorV2Adress = networkConfig[chainId].vrfCoordinatorV2;
         subscriptionId = networkConfig[chainId].subscriptionId;
