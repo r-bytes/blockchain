@@ -107,8 +107,8 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
         // (block.timestamp - lastBlockTimestamp) > interval
         bool timePassed = ((block.timestamp - s_lastTimestamp) > i_interval);
         bool hasPlayers = (s_players.length > 0);
-        bool hasBallance = address(this).balance > 0;
-        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBallance && hasPlayers);
+        bool hasBalance = address(this).balance > 0;
+        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance && hasPlayers);
         return (upkeepNeeded, "0x0");
     }
 
@@ -192,7 +192,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
         return s_lastTimestamp;
     }
 
-    function getRequestConfirmation() public pure returns (uint256){
+    function getRequestConfirmation() public pure returns (uint256) {
         return REQUEST_CONFIRMATIONS;
     }
 
