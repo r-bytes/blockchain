@@ -60,7 +60,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
 
     // * functions
     constructor(
-        address vrfCoordinatorV2, //contract
+        address vrfCoordinatorV2, //external contract
         uint256 entranceFee,
         bytes32 gasLane,
         uint64 subscriptionId,
@@ -108,14 +108,15 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
         bool timePassed = ((block.timestamp - s_lastTimestamp) > i_interval);
         bool hasPlayers = (s_players.length > 0);
         bool hasBalance = address(this).balance > 0;
-        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance && hasPlayers);
+        upkeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers);
         return (upkeepNeeded, "0x0");
     }
 
-    function performUpkeep(bytes calldata /* performData */) external override {
+    function performUpkeep(bytes calldata) external override {
         // check if upkeep is needed
-        (bool upkeepNeeded, ) = checkUpkeep("");
+        bool upkeepNeeded = checkUpkeepNeeded();
 
+        // revert when no upkeep is needed
         if (!upkeepNeeded) {
             revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
@@ -124,11 +125,12 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
             );
         }
 
-        // request random number
-        // will revert if subscription is not set and funded.
+        // set raffle state from open to calculating
         s_raffleState = RaffleState.CALCULATING;
+        
+        // request random number, revert if subscription is not set and funded.
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane, // gasLane
+            i_gasLane,
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
@@ -198,5 +200,10 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatible {
 
     function getInterval() public view returns (uint256) {
         return i_interval;
+    }
+
+    function checkUpkeepNeeded() public view returns (bool) {
+        (bool upkeepNeeded,) = checkUpkeep("");
+        return upkeepNeeded; 
     }
 }
