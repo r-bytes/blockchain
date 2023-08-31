@@ -11,7 +11,7 @@ interface NetworkConfigItem {
     gasLane: Address;
     subscriptionId?: string;
     callbackGasLimit?: string;
-    interval?: string;
+    interval?: number;
 }
 
 export const networkConfig: NetworkConfig = {
@@ -21,7 +21,7 @@ export const networkConfig: NetworkConfig = {
         gasLane: "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c", // doesn't matter on hh
         subscriptionId: "0",
         callbackGasLimit: "500000",
-        interval: "30"
+        interval: 30
     },
     "1": {
         name: "main",
@@ -35,7 +35,7 @@ export const networkConfig: NetworkConfig = {
         entranceFee: ethers.parseEther("0.01"),
         gasLane: "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c", // 30 gwei Key Hash
         callbackGasLimit: "500000",
-        interval: "30"
+        interval: 30
     },
     "5": {
         name: "goerli",
