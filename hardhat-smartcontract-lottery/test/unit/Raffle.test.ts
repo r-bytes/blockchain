@@ -1,26 +1,30 @@
 import { deployments, ethers, getNamedAccounts, network } from "hardhat";
 import { developmentChains, networkConfig } from "../../helper-hardhat-config";
 import { assert, expect } from "chai";
-import { Deployment } from "hardhat-deploy/types";
+import { Deployment, Receipt } from "hardhat-deploy/types";
 import { Raffle, VRFCoordinatorV2Mock } from "../../typechain-types";
-import { BigNumber } from "ethers";
+import { BigNumber, ContractReceipt, ContractTransaction } from "ethers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe("Raffle Unit Tests", () => {
         let raffle: Raffle,
+            raffleContract: Raffle,
             vrfCoordinatorV2Mock: VRFCoordinatorV2Mock,
             raffleEntranceFee: BigNumber,
-            deployer: string,
-            player: string,
-            interval: BigNumber | number | string;
+            deployer: SignerWithAddress,
+            player: SignerWithAddress,
+            interval: BigNumber | number | string,
+            accounts: SignerWithAddress[]
         const chainId: number = network.config.chainId!;
 
         beforeEach(async () => {
             // grab the accounts
-            deployer = (await getNamedAccounts()).deployer;
-            player = (await getNamedAccounts()).player;
+            accounts = await ethers.getSigners() // could also do with getNamedAccounts
+            deployer = accounts[0];
+            player = accounts[1];
 
             // deploy modules with "all" tag
             const deploymentResult: { [name: string]: Deployment } = await deployments.fixture([
@@ -33,7 +37,8 @@ import { BigNumber } from "ethers";
                 deploymentResult["VRFCoordinatorV2Mock"].address;
 
             // get deployed contracts
-            raffle = await ethers.getContract("Raffle");
+            raffleContract = await ethers.getContract("Raffle");
+            raffle = raffleContract.connect(player)
             vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
 
             raffleEntranceFee = await raffle.getEntranceFee();
@@ -61,7 +66,7 @@ import { BigNumber } from "ethers";
 
                 const playerFromContract = await raffle.getPlayer(0);
 
-                assert.equal(playerFromContract, deployer);
+                assert.equal(playerFromContract, deployer.address);
             });
 
             it("should emit an event on enter", async () => {
@@ -172,6 +177,91 @@ import { BigNumber } from "ethers";
                 
                 assert(Number(requestId) > 0)
                 assert(Number(raffleState) === 1)
+
+            })
+        })
+
+        describe("fulfillRandomWords", () => {
+            beforeEach(async () => {
+                // for each test below, someone should have entered the raffle
+                await raffle.enterRaffle({ value: raffleEntranceFee })
+                // some time has past and a block is mined
+                await network.provider.send("evm_increaseTime", [Number(interval) + 1])
+                await network.provider.request({ method: "evm_mine", params: [] })
+            })
+            
+            it("can only be called after performUpkeep", async () => {
+                await expect(vrfCoordinatorV2Mock.fulfillRandomWords(0, raffle.address)).to.be.revertedWith("nonexistent request")
+            })
+            
+            it("can only be called after performUpkeep", async () => {
+                await expect(vrfCoordinatorV2Mock.fulfillRandomWords(1, raffle.address)).to.be.revertedWith("nonexistent request")
+            })
+
+            it("picks a winner, resets the lottery, and send money", async () => {
+                const additionalEntrants = 3
+                const accounts = await ethers.getSigners();
+                const startingIndex = 2 // [deployer, player]
+
+                for (let i = startingIndex; i < startingIndex + additionalEntrants; i++) {
+                    // connect as user
+                    raffle = raffleContract.connect(accounts[i])
+                    await raffle.enterRaffle({ value: raffleEntranceFee })
+                }
+
+                const startingTimestamp = await raffle.getLatestTimestamp();
+
+                // perform upkeep
+                // fullfill random words
+                // wait for the fulfill random words event
+                await new Promise<void>(async (resolve, reject) => {
+                    // setup listener
+                    raffle.once("WinnerPicked", async () => {
+                        console.log("detected winner picked event!")
+                        try {
+                            const recentWinner = await raffle.getRecentWinner()
+                            const raffleState = await raffle.getRaffleState()
+                            const winnerBalance = await accounts[2].getBalance()
+                            const endingTimeStamp = await raffle.getLatestTimestamp()
+                            const numPlayers = await raffle.getNumberOfPlayers()
+                            
+                            console.log("winner", recentWinner)
+                            
+                            assert.equal(Number(numPlayers), 0) 
+                            assert.equal(raffleState, 0)
+                            assert(endingTimeStamp > startingTimestamp)
+
+                            assert.equal(
+                                // winner ending balace = the money of all players multiplied
+                                winnerBalance.toString(),
+                                startingBalance
+                                    .add(
+                                        raffleEntranceFee
+                                            .mul(additionalEntrants)
+                                            .add(raffleEntranceFee)
+                                    )
+                                    .toString()
+                            )
+
+                            // await expect(raffle.getPlayer(0)).to.be.reverted
+                            
+                            resolve();
+                        } catch (error) {
+                            reject(error);
+                        }
+                    })
+                    // * inside of the promise but outside of the listener
+                    // mock cl keepers
+                    const tx: ContractTransaction = await raffle.performUpkeep("0x")
+                    const txReceipt: ContractReceipt = await tx.wait(1)
+                    const startingBalance = await accounts[2].getBalance()
+
+                    // mock cl vrf
+                    await vrfCoordinatorV2Mock.fulfillRandomWords(
+                        txReceipt!.events![1].args!.requestId,
+                        raffle.address
+                    )
+                })
 
             })
         })

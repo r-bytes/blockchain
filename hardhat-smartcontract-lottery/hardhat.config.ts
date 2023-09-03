@@ -32,6 +32,9 @@ const config: HardhatUserConfig = {
             default: 1,
         },
     },
+    mocha: {
+        timeout: 200000
+    },
     defaultNetwork: "hardhat",
     networks: {
         hardhat: {
