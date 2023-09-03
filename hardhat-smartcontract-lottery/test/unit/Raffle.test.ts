@@ -143,4 +143,36 @@ import { BigNumber } from "ethers";
                 assert(upkeepNeeded)
             })
         })
+
+        describe("performUpkeep", () => {
+            it("should only run if checkUpkeep is true", async () => {
+                await raffle.enterRaffle({ value: raffleEntranceFee })
+                await network.provider.send("evm_increaseTime", [Number(interval) + 1])
+                await network.provider.request({ method: "evm_mine", params: [] })
+
+                const tx = await raffle.performUpkeep("0x")
+                assert(tx)
+            })
+
+            it("should revert when checkUpkeep is false", async () => {
+                await expect(raffle.performUpkeep("0x")).to.be.revertedWith("Raffle__UpkeepNotNeeded")
+            })
+
+            it("should update the raffle state, emits an event and call the vrf coordinator", async () => {
+                await raffle.enterRaffle({ value: raffleEntranceFee })
+                await network.provider.send("evm_increaseTime", [Number(interval) + 1])
+                await network.provider.request({ method: "evm_mine", params: [] })
+
+                const txResponse = await raffle.performUpkeep("0x")
+                const txReceipt = await txResponse.wait(1)
+                
+                const raffleState = await raffle.getRaffleState();
+
+                const requestId = txReceipt!.events![1].args!.requestId
+                
+                assert(Number(requestId) > 0)
+                assert(Number(raffleState) === 1)
+
+            })
+        })
     });
