@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { DeployFunction, DeployResult } from "hardhat-deploy/dist/types";
 import { developmentChains, networkConfig } from "../helper-hardhat-config";
 import { verify } from "../utils/verify";
-import { Contract } from "ethers";
+import { Contract, ContractReceipt, ContractTransaction } from "ethers";
 
 
 const FUND_AMOUNT = ethers.utils.parseEther("30");
@@ -22,10 +22,10 @@ const deployRaffle: DeployFunction = async ({ getNamedAccounts, deployments, net
         vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
         
         // create a subscription programmatically
-        const transactionResponse = await vrfCoordinatorV2Mock.createSubscription();
-        const transactionReceipt = await transactionResponse.wait();
+        const transactionResponse: ContractTransaction = await vrfCoordinatorV2Mock.createSubscription();
+        const transactionReceipt: ContractReceipt = await transactionResponse.wait();
         
-        subscriptionId = transactionReceipt.events[0].args.subId;
+        subscriptionId = transactionReceipt!.events![0].args!.subId;
         
         // fund the subscription
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT);        
