@@ -1,8 +1,14 @@
 import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-// import "@nomiclabs/hardhat-etherscan";
+// import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
 import "hardhat-deploy";
 import "hardhat-contract-sizer";
+import "hardhat-gas-reporter";
+import "solidity-coverage";
+import "@typechain/hardhat";
+
+import "@nomiclabs/hardhat-waffle";
 
 import "dotenv/config";
 

@@ -3,7 +3,7 @@ import { ethers, network } from "hardhat";
 // prettier-ignore
 import { developmentChains } from "../helper-hardhat-config";
 
-const BASE_FEE = ethers.parseEther("0.25") // 0.25 is the premium according to the docs at https://docs.chain.link/vrf/v2/subscription/supported-networks. it costs 0.25 LINK per request.
+const BASE_FEE = ethers.utils.parseEther("0.25") // 0.25 is the premium according to the docs at https://docs.chain.link/vrf/v2/subscription/supported-networks. it costs 0.25 LINK per request.
 const GAS_PRICE_LINK = 1e9 // link per gas. calculated value based on the gas price of the chain.
 // prettier-ignore
 const deployMocks: DeployFunction = async ({ getNamedAccounts, deployments }) => {
