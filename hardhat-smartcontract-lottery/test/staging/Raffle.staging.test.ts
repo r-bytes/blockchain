@@ -8,7 +8,7 @@ import { Raffle } from "../../typechain-types";
 
 developmentChains.includes(network.name)
     ? describe.skip
-    : describe("Raffle Unit Tests", () => {
+    : describe("Raffle Staging Tests", () => {
         let raffle: Raffle, raffleEntranceFee: BigNumber, deployer: SignerWithAddress, accounts: SignerWithAddress[]
 
         beforeEach(async () => {
@@ -50,7 +50,10 @@ developmentChains.includes(network.name)
                     })
 
                     // enter the raffle
-                    await raffle.enterRaffle({ value: raffleEntranceFee })
+                    console.log('entering Raffle...')
+                    const tx = await raffle.enterRaffle({ value: raffleEntranceFee })
+                    await tx.wait(1)
+                    console.log('time to wait...')
                     const winnerStartingBalance = await deployer.getBalance();
 
                     // * listener must finish listening in order to complete the code!!
