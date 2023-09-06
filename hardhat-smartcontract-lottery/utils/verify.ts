@@ -15,7 +15,7 @@ export const verify = async (
         if (error.message.toLowerCase().includes("=====> already verified")) {
             console.log("=====> verification failed");
         } else {
-            console.log(error);
+            console.error(error);
         }
     }
 };

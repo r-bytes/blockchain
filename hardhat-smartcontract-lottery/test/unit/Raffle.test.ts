@@ -66,7 +66,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
                 const playerFromContract = await raffle.getPlayer(0);
 
-                assert.equal(playerFromContract, deployer.address);
+                assert.equal(playerFromContract, player.address);
             });
 
             it("should emit an event on enter", async () => {

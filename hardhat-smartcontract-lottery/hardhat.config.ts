@@ -56,7 +56,10 @@ const config: HardhatUserConfig = {
         },
     },
     etherscan: {
-        apiKey: ETHERSCAN_API_KEY,
+        apiKey: {
+            sepolia: ETHERSCAN_API_KEY,
+        },
+        customChains: [],
     },
     gasReporter: {
         enabled: false,
