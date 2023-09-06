@@ -61,6 +61,10 @@ yarn hardhat test
 yarn hardhat coverage
 ```
 
+![Alt text](./test/img/2.png "staging tests on sepolia testnet")
+
+
+![Alt text](./test/img/1.png "unit tests on local hardhat node")
 
 
 # Deployment to a testnet or mainnet
