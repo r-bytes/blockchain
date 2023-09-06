@@ -1,4 +1,4 @@
-# Hardhat Smartcontract Lottery (Raffle) FCC
+# Hardhat Smartcontract Lottery
 This project demonstrates how to create a Verifyable Random Autonomous Decentralised Raffle using: TypeScript, Hardhat, Ethersjs, Chainlink VRF, Chainlink Keepers
 
 - [Hardhat Smartcontract Lottery (Raffle) FCC](#hardhat-smartcontract-lottery-raffle-fcc)
