@@ -6,9 +6,6 @@ import { DeployFunction } from "hardhat-deploy/types";
 const FRONT_END_ADDRESSES_FILE: string = "../nextjs-smartcontract-lottery/constants/contractAddresses.json"
 const FRONT_END_ABI_FILE: any = "../nextjs-smartcontract-lottery/constants/abi.json";
 
-interface ICurrentAddresses {  
-}
-
 // update contants folder in frontend
 const updateFrontend: DeployFunction = async (): Promise<void> => {
     if (process.env.UPDATE_FRONT_END) {
@@ -44,4 +41,4 @@ const updateContractAddresses = async (): Promise<void> => {
 
 export default updateFrontend;
 
-updateContractAddresses.tags = ["all", "frontend"]
+updateFrontend.tags = ["all", "frontend"];
