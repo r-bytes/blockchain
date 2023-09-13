@@ -20,6 +20,10 @@ const updateABI = async (): Promise<void> => {
     console.log("=====> updating ABI in frontend folders...");
     // @ts-ignore
     writeFileSync(FRONT_END_ABI_FILE, raffle.interface.format(ethers.utils.FormatTypes.json));
+    // replace to match ContractInterface
+    const data = readFileSync(FRONT_END_ABI_FILE, "utf8");
+    const result = data.replace(/29000000/g, '"29000000"');
+    writeFileSync(FRONT_END_ABI_FILE, result, "utf8");
 }
 
 const updateContractAddresses = async (): Promise<void> => {
