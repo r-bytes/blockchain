@@ -29,11 +29,11 @@ const updateContractAddresses = async (): Promise<void> => {
     
     if (chainId in currentAddresses) {
         if (!currentAddresses[chainId].includes(raffle.address)) {
-            currentAddresses[chainId].push(raffle.address);
+            currentAddresses[chainId].push([raffle.address]);
         }
         
     } {
-        currentAddresses[chainId] = raffle.address;
+        currentAddresses[chainId] = [raffle.address];
     }
     console.log("=====> updating Contract Addresses in frontend folders...")
     writeFileSync(FRONT_END_ADDRESSES_FILE, JSON.stringify(currentAddresses))
