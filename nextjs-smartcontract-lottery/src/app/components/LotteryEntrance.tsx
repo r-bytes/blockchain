@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useMoralis, useWeb3Contract } from "react-moralis";
 import { abi, contractAddresses } from "../../../constants/index";
 // @ts-ignore
+import Link from "next/link";
 import { useNotification } from "web3uikit";
 import { PayloadType } from "web3uikit/dist/components/Notification/types";
+import { Spinner } from ".";
 
 interface contractAddressesInterface {
     [key: string]: string[];
@@ -35,7 +37,11 @@ const LotteryEntrance = (): JSX.Element => {
     }, [isWeb3Enabled]);
 
     // contract functions
-    const { runContractFunction: enterRaffle } = useWeb3Contract({
+    const {
+        runContractFunction: enterRaffle,
+        isFetching,
+        isLoading,
+    } = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress!,
         functionName: "enterRaffle",
@@ -113,34 +119,47 @@ const LotteryEntrance = (): JSX.Element => {
     };
 
     return (
-        <div className="text-xs">
-            Welcome to the raffle!
+        <div className="text-xs p-4">
             {raffleAddress ? (
                 <div>
                     <button
-                        className="border border-neutral-600 rounded-full py-2 px-3 hover:bg-neutral-800 animate-pulse"
+                        className="border border-neutral-600 font-bold rounded py-2 px-3 hover:bg-neutral-800 disabled:cursor-not-allowed"
                         onClick={async () =>
                             await enterRaffle({
                                 onSuccess: (tx) => handleSuccess(tx as ContractTransaction),
                                 onError: (error) => console.log("error", error),
                             })
                         }
+                        disabled={isFetching || isLoading}
                     >
-                        Enter Raffle{" "}
+                        {isFetching || isLoading ? <Spinner /> : <span>Enter Raffle</span>}
                     </button>{" "}
-                    <div>
-                        Entrance Fee:{" "}
-                        <span className="text-xs text-neutral-400">
-                            {entranceFee ? ethers.utils.formatUnits(entranceFee) : ""} ETH
-                        </span>
-                    </div>
-                    <div>
-                        Number of Players:{" "}
-                        <span className="text-xs text-neutral-400">{numPlayers} players</span>
-                    </div>
-                    <div>
-                        Recent Winner:{" "}
-                        <span className="text-xs text-neutral-400">{recentWinner}</span>
+                    <div className="p-1 mt-4 flex flex-col gap-2">
+                        <div>
+                            Entrance Fee:{" "}
+                            <span className="text-xs text-neutral-400">
+                                {entranceFee ? ethers.utils.formatUnits(entranceFee) : ""} ETH
+                            </span>
+                        </div>
+                        <div>
+                            Number of Players:{" "}
+                            <span className="text-xs text-neutral-400">{numPlayers} players</span>
+                        </div>
+                        <div>
+                            Recent Winner:{" "}
+                            <span className="text-xs text-neutral-400">{recentWinner}</span>
+                        </div>
+                        <div>
+                            View contract on{" "}
+                            <Link
+                                href={
+                                    `https://sepolia.etherscan.io/address/${raffleAddress!}`
+                                }
+                            >
+                                {" "}
+                                <span className="underline text-indigo-600 visited:bg-purple-500">etherscan</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
             ) : (
