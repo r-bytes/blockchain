@@ -34,7 +34,7 @@
         "styled-components": "^6.0.7",
         "tailwindcss": "3.3.3",
         "typescript": "5.2.2",
-        "web3uikit": "^1.0.4"
+        "web3uikit": "^0.1.170"
     },
     "devDependencies": {
         "encoding": "^0.1.13",
