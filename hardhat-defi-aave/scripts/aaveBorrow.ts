@@ -84,27 +84,32 @@ const approveERC20 = async (erc20Address: string, spenderAddress: string, amount
 }
 
 const getBorrowUserData = async (lendingPool: ILendingPool, account: HardhatEthersSigner): Promise<{ totalDebtETH: bigint; availableBorrowsETH: bigint }> => {
-    console.log("getting user data...")
-
+    // get user data
     const { totalCollateralETH, totalDebtETH, availableBorrowsETH } = await lendingPool.getUserAccountData(account)
-    console.log(`you have ${totalCollateralETH} worth of ETH deposited`)
-    console.log(`you have ${totalDebtETH} worth of ETH borrowed`)
-    console.log(`you can borrow ${availableBorrowsETH} worth of ETH`)
+
+    console.log("----------------------------------------------------------------")
+    console.log(`you now have: ${totalCollateralETH} worth of ETH deposited`)
+    console.log(`you now have: ${totalDebtETH} worth of ETH borrowed`)
+    console.log(`you can now borrow: ${availableBorrowsETH} worth of ETH`)
+    console.log("----------------------------------------------------------------")
 
     return { totalDebtETH, availableBorrowsETH }
 }
 
 const getDaiPrice = async (): Promise<bigint> => {
-    console.log("getting dai price...")
+    console.log("getting latest DAI/ETH price...")
+
+    // get latest priceFeed
     const daiEthPriceFeed = await ethers.getContractAt("AggregatorV3Interface", networkConfig[network.config!.chainId!].daiEthPriceFeed!)
     const price = (await daiEthPriceFeed.latestRoundData())[1]
-    console.log(`DAI/ETH latest price is ${price}`)
+
+    console.log(`DAI/ETH latest price is: ${price}`)
 
     return price
 }
 
 const borrowDai = async (daiAddress: string, lendingPool: ILendingPool, ammountDaiToBorrowDai: string, account: HardhatEthersSigner): Promise<void> => {
-    console.log("borowing...", daiAddress, ammountDaiToBorrowDai, account.address)
+    console.log("borowing...")
 
     const borrowTx: ContractTransactionResponse = await lendingPool.borrow(
         daiAddress,
